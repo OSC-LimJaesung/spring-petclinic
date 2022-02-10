@@ -117,7 +117,7 @@ spec:
     }
     stage('Scan image') {
       steps {
-        neuvector registrySelection: 'Local', repository: 'library/samples/spring-petclinic', tag: 'latest'
+        neuvector registrySelection: 'habor', repository: ' library/samples/spring-petclinic', tag: 'latest'
       }
     }
 
