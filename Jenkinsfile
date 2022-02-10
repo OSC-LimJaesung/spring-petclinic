@@ -8,11 +8,11 @@ pipeline {
   environment {
     APP_VER = "v1.0.${BUILD_ID}"
     // HARBOR_URL = ""
-    DEPLOY_GITREPO_USER = "howdi2001"    
+    DEPLOY_GITREPO_USER = "howdi2001"
     DEPLOY_GITREPO_URL = "github.com/${DEPLOY_GITREPO_USER}/spring-petclinic-helmchart.git"
     DEPLOY_GITREPO_BRANCH = "main"
     DEPLOY_GITREPO_TOKEN = credentials('my-github')
-  }    
+  }
   agent {
     kubernetes {
       label "spring-petclinic-${myid}"
@@ -41,10 +41,10 @@ spec:
     command:
     - sleep
     args:
-    - 99d    
+    - 99d
     volumeMounts:
     - mountPath: "/root/.m2"
-      name: m2      
+      name: m2
     - name: docker-config
       mountPath: /kaniko/.docker
     - name: ca-cert
@@ -85,7 +85,7 @@ spec:
                 mvn -B -ntp -T 2 test -DAPP_VERSION=${APP_VER}
               """
             }
-            jacoco ( 
+            jacoco (
               execPattern: 'target/*.exec',
               classPattern: 'target/classes',
               sourcePattern: 'src/main/java',
@@ -97,12 +97,12 @@ spec:
               archiveArtifacts artifacts: 'target/**/*.jar', fingerprint: true
               junit 'target/surefire-reports/**/*.xml'
             }
-          } 
+          }
         }
         // stage('Static Code Analysis') {
         //   steps {
         //     container('maven') {
-        //       withSonarQubeEnv('My SonarQube') { 
+        //       withSonarQubeEnv('My SonarQube') {
         //         sh """
         //         mvn sonar:sonar \
         //           -Dsonar.projectKey=spring-petclinic \
@@ -112,9 +112,15 @@ spec:
         //       }
         //     }
         //   }
-        // }  
+        // }
       }
     }
+    stage('Scan image') {
+      steps {
+        neuvector registrySelection: 'Local', repository: 'library/samples/spring-petclinic', tag: 'latest'
+      }
+    }
+
     stage('Containerize') {
       steps {
         container('kaniko') {
@@ -137,7 +143,7 @@ spec:
       steps {
         echo "Update helm chart to trigger GitOps-based deployment..."
       }
-    }    
+    }
     stage('GitOps-based Deploy') {
       steps {
         container('maven') {
@@ -157,7 +163,7 @@ spec:
           """
         }
       }
-    }   
+    }
   }
 }
 
