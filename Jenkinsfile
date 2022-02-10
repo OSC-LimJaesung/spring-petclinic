@@ -115,11 +115,7 @@ spec:
 //         // }
 //       }
 //     }
-    stage('Scan image') {
-      steps {
-        neuvector registrySelection: 'habor', repository: ' library/samples/spring-petclinic', tag: 'latest'
-      }
-    }
+
 
     stage('Containerize') {
       steps {
@@ -127,6 +123,11 @@ spec:
           sh "sed -i 's,harbor.example.com,${env.HARBOR_URL},g' Dockerfile"
           sh "/kaniko/executor --dockerfile Dockerfile --context `pwd` --skip-tls-verify --destination=${env.HARBOR_URL}/library/samples/spring-petclinic:v1.0.${env.BUILD_ID}"
         }
+      }
+    }
+    stage('Scan image') {
+      steps {
+        neuvector registrySelection: 'habor', repository: ' library/samples/spring-petclinic', tag: "v1.0.${env.BUILD_ID}"
       }
     }
     // stage('Image Vulnerability Scan') {
